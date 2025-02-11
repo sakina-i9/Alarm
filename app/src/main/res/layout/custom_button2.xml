@@ -5,20 +5,16 @@
 
     <LinearLayout
         style="@style/Widget.AppCompat.Button"
-        android:layout_width="200dp"
-        android:layout_height="220dp"
-        android:orientation="vertical"
-        android:layout_marginTop="165dp">
-
-        <ImageView
-            android:layout_width="140dp"
-            android:layout_height="158dp"
-            android:src="@drawable/time" />
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_marginTop="165dp"
+        android:orientation="vertical">
 
         <TextView
+            android:id="@+id/tvSelectedTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/Time"
+            android:text="@string/Timestart"
             android:textSize="20sp" />
 
     </LinearLayout>

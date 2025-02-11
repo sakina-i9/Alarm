@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Alarm</string>
     <string name="Time">目覚まし設定</string>
+    <string name="Timestart">時間の設定</string>
 </resources>

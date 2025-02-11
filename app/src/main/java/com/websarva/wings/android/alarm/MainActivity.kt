@@ -1,5 +1,6 @@
 package com.websarva.wings.android.alarm
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -24,7 +25,8 @@ class MainActivity : AppCompatActivity() {
 
         // クリックイベントを設定
         myCustomButton.setOnClickListener {
-            Toast.makeText(this, "カスタムボタンが押されました", Toast.LENGTH_SHORT).show()
+            val intent = Intent (this, AlarmActivity::class.java)
+            startActivity(intent)
         }
     }
 }
