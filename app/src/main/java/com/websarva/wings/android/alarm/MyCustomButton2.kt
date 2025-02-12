@@ -3,8 +3,9 @@ package com.websarva.wings.android.alarm
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.widget.LinearLayout
 import android.view.LayoutInflater
+import android.widget.LinearLayout
+import android.widget.TextView
 
 class CharacterButton2 @JvmOverloads constructor(
     context: Context,
@@ -12,25 +13,29 @@ class CharacterButton2 @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
+    private var listener: OnClickListener? = null
+    private val tvSelectedTime: TextView
+
     init {
-        LayoutInflater.from(context).inflate(R.layout.custom_button2, this)
+        LayoutInflater.from(context).inflate(R.layout.custom_button2, this, true)
+        tvSelectedTime = findViewById(R.id.tvSelectedTime)
     }
 
-    private var listener: OnClickListener? = null
-
-    // setOnClickListenerメソッドのオーバーライド
     override fun setOnClickListener(l: OnClickListener?) {
         listener = l
     }
 
-    // タッチイベントの処理
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.action == MotionEvent.ACTION_UP) {
             listener?.let {
-                post { it.onClick(this) } // UIスレッドでonClickを呼び出し
+                post { it.onClick(this) }
             }
         }
         return super.dispatchTouchEvent(ev)
     }
 
+    // 時間を設定する関数を追加
+    fun setTimeText(time: String) {
+        tvSelectedTime.text = time
+    }
 }

@@ -6,8 +6,8 @@
     <LinearLayout
         style="@style/Widget.AppCompat.Button"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_marginTop="165dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="20dp"
         android:orientation="vertical">
 
         <TextView
