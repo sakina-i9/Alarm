@@ -9,11 +9,24 @@
     android:background="#A1A9BA"
     android:orientation="vertical">
 
-    <com.websarva.wings.android.alarm.CharacterButton
-        android:id="@+id/customBtn"
-        android:layout_width="250dp"
+    <TextClock
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:ignore="MissingClass" />
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="40dp"
+        android:textSize="60sp"
+        android:timeZone="Asia/Tokyo"
+        android:format24Hour="HH:mm:ss"/>
+
+    <com.websarva.wings.android.alarm.CharacterButton
+        android:id="@+id/customBtn_alarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.websarva.wings.android.alarm.CharacterButton
+        android:id="@+id/customBtn_calender"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 
 </LinearLayout>

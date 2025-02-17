@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">Alarm</string>
+    <string name="text">text</string>
     <string name="Time">目覚まし設定</string>
     <string name="Timestart">時間の設定</string>
+    <string name="calender">メモ</string>
+    <string name="niti">日</string>
+    <string name="getu">月</string>
+    <string name="ka">火</string>
+    <string name="sui">水</string>
+    <string name="moku">木</string>
+    <string name="kin">金</string>
+    <string name="dou">土</string>
+    <string name="kakunin">選択した曜日</string>
 </resources>

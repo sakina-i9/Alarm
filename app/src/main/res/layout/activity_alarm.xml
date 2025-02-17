@@ -18,24 +18,27 @@
         android:timeZone="Asia/Tokyo"
         android:format24Hour="HH:mm:ss"/>
 
-    <TextView
-        android:id="@+id/tvSelectedTime"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="選択された時間"
-        android:textSize="20sp"
-        android:padding="16dp"/>
+        android:orientation="horizontal"
+        android:gravity="right">
 
-    <Button
-        android:id="@+id/btnSetTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="時間を設定"/>
+        <ImageButton
+            android:id="@+id/add_alarm"
+            android:layout_width="99dp"
+            android:layout_height="111dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/plus"
+            android:layout_marginTop="20dp"/>
 
-    <com.websarva.wings.android.alarm.CharacterButton2
-        android:id="@+id/customBtn"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        tools:ignore="MissingClass" />
+        <ImageButton
+            android:id="@+id/alarm_delete"
+            android:layout_width="99dp"
+            android:layout_height="111dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/delete"
+            android:layout_marginTop="20dp"/>
 
+    </LinearLayout>
 </LinearLayout>
