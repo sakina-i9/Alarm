@@ -16,8 +16,12 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.room.Room
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 class TimesetActivity : AppCompatActivity() {
@@ -88,6 +92,10 @@ class TimesetActivity : AppCompatActivity() {
         val chipSat = findViewById<Chip>(R.id.chipSat)
         val chipGroupDays = findViewById<ChipGroup>(R.id.chipGroupDays)
         val btnCheckDays = findViewById<Button>(R.id.btnCheckDays)
+        val btnSaveAlarm = findViewById<Button>(R.id.btnSaveAlarm)
+        val editAlarmName = findViewById<EditText>(R.id.Alarm_Name)
+        val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
+        val tvAfterMusic = findViewById<TextView>(R.id.SetAfterMusic)
 
         // Viewの初期化
         tvTime = findViewById(R.id.tvTime)
@@ -121,6 +129,47 @@ class TimesetActivity : AppCompatActivity() {
         val btnSelectAudio2 = findViewById<Button>(R.id.After_Music)
         btnSelectAudio2.setOnClickListener {
             audioPickerLauncher2.launch("audio/*")
+        }
+
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AlarmDatabase::class.java, "alarms-db"
+        ).build()
+
+        btnSaveAlarm.setOnClickListener{
+            val timeText = tvTime.text.toString()
+
+            val selectedDays = mutableListOf<String>()
+            if (chipSun.isChecked) selectedDays.add("日")
+            if (chipMon.isChecked) selectedDays.add("月")
+            if (chipTue.isChecked) selectedDays.add("火")
+            if (chipWed.isChecked) selectedDays.add("水")
+            if (chipThu.isChecked) selectedDays.add("木")
+            if (chipFri.isChecked) selectedDays.add("金")
+            if (chipSat.isChecked) selectedDays.add("土")
+
+            val alarmName = editAlarmName.text.toString()
+            val alarmMusic = tvAlarmMusic.text.toString()
+            val afterMusic = tvAfterMusic.text.toString()
+
+            // Alarm オブジェクト作成
+            val alarm = Alarm(
+                time = timeText,
+                days = selectedDays.joinToString(","),
+                alarmName = alarmName,
+                alarmMusic = alarmMusic,
+                afterMusic = afterMusic
+            )
+
+            // コルーチンでデータベースに保存
+            CoroutineScope(Dispatchers.IO).launch {
+                db.alarmDao().insert(alarm)
+                runOnUiThread {
+                    Toast.makeText(this@TimesetActivity, "アラームが保存されました", Toast.LENGTH_SHORT).show()
+                    // 必要に応じて AlarmActivity へ遷移
+                    // startActivity(Intent(this@TimesetActivity, AlarmActivity::class.java))
+                }
+            }
         }
     }
 

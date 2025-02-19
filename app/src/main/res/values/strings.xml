@@ -3,7 +3,6 @@
     <string name="text">text</string>
     <string name="Time">目覚まし設定</string>
     <string name="TimeName">アラームの名前</string>
-    <string name="Timestart">時間の設定</string>
     <string name="calender">メモ</string>
     <string name="niti">日</string>
     <string name="getu">月</string>
@@ -17,4 +16,5 @@
     <string name="AfterMusic">起床後の音声</string>
     <string name="setAlarmName">選択したアラーム音</string>
     <string name="setAfterMusicName">選択した音声</string>
+    <string name="save">保存</string>
 </resources>
