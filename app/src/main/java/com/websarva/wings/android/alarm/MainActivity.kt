@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         val ScaduleButton = findViewById<CharacterButton>(R.id.customBtn_calender)
         ScaduleButton.setchoice(R.drawable.calender,getString(R.string.calender))
         ScaduleButton.setOnClickListener{
-            val intent = Intent(this, MemoActivity::class.java)
+            val intent = Intent(this, CalendarActivity::class.java)
             startActivity(intent)
         }
     }

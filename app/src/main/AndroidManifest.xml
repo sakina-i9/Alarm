@@ -23,7 +23,7 @@
             android:name=".TimesetActivity"
             android:exported="false" />
         <activity
-            android:name=".MemoActivity"
+            android:name=".CalendarActivity"
             android:exported="false" />
         <activity
             android:name=".AlarmActivity"

@@ -35,11 +35,18 @@ class TimesetActivity : AppCompatActivity() {
     private lateinit var tvTime: TextView
     private lateinit var btnSelectTime: Button
 
-    // Alarm Music用ファイル選択
+    // Alarm Music 用ファイル選択（永続的なアクセス権取得のため OpenDocument を使用）
     private val audioPickerLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
+            try {
+                // 永続的な読み取り権限を取得（FLAG_GRANT_READ_URI_PERMISSION を使用）
+                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(it, flags)
+            } catch (e: Exception) {
+                Toast.makeText(this, "権限取得に失敗しました: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
             val fileName = getFileName(it)
             Toast.makeText(this, "選択された音声ファイル: $it", Toast.LENGTH_SHORT).show()
             val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
@@ -49,11 +56,17 @@ class TimesetActivity : AppCompatActivity() {
         }
     }
 
-    // After Music用ファイル選択
+    // After Music 用ファイル選択（同様に OpenDocument を使用）
     private val audioPickerLauncher2 = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
+            try {
+                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(it, flags)
+            } catch (e: Exception) {
+                Toast.makeText(this, "権限取得に失敗しました: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
             val fileName = getFileName(it)
             Toast.makeText(this, "選択された音声ファイル: $it", Toast.LENGTH_SHORT).show()
             val tvAfterMusic = findViewById<TextView>(R.id.SetAfterMusic)
@@ -67,7 +80,7 @@ class TimesetActivity : AppCompatActivity() {
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
         cursor?.use {
             val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (it.moveToFirst()) {
+            if (it.moveToFirst() && nameIndex != -1) {
                 fileName = it.getString(nameIndex)
             }
         }
@@ -121,7 +134,6 @@ class TimesetActivity : AppCompatActivity() {
             editAlarmName.setText(alarmNameText ?: "")
 
             // 編集時は、保存済みの alarmMusicText をチェック
-            // もし "content://" で始まるなら正しいURIと判断
             if (!alarmMusicText.isNullOrEmpty() && alarmMusicText.startsWith("content://")) {
                 tvAlarmMusic.text = getFileName(Uri.parse(alarmMusicText))
                 tvAlarmMusic.tag = alarmMusicText
@@ -168,11 +180,12 @@ class TimesetActivity : AppCompatActivity() {
         // 音声ファイル選択ボタンの設定
         val btnSelectAudio = findViewById<Button>(R.id.Alarm_Music_Button)
         btnSelectAudio.setOnClickListener {
-            audioPickerLauncher.launch("audio/*")
+            // MIMEタイプ "audio/*" のファイルを選択
+            audioPickerLauncher.launch(arrayOf("audio/*"))
         }
         val btnSelectAudio2 = findViewById<Button>(R.id.After_Music)
         btnSelectAudio2.setOnClickListener {
-            audioPickerLauncher2.launch("audio/*")
+            audioPickerLauncher2.launch(arrayOf("audio/*"))
         }
 
         val db = Room.databaseBuilder(
@@ -192,7 +205,7 @@ class TimesetActivity : AppCompatActivity() {
             if (chipSat.isChecked) selectedDays.add("土")
 
             val alarmName = editAlarmName.text.toString()
-            // 保存時は TextView の tag から正しい URI を取得
+            // TextView の tag に保存した正しい URI を使用
             val alarmMusic = tvAlarmMusic.tag?.toString() ?: ""
             val afterMusic = tvAfterMusic.tag?.toString() ?: ""
 
