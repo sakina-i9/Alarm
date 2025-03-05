@@ -1,5 +1,6 @@
 package com.websarva.wings.android.alarm
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -14,6 +15,9 @@ class AlarmScreenActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val afterMusicUriString = intent.getStringExtra("afterMusic")
+        Log.d("AlarmScreenActivity", "afterMusic URI: $afterMusicUriString")
 
         // ロック状態でも画面を表示する設定
         setShowWhenLocked(true)
@@ -56,13 +60,25 @@ class AlarmScreenActivity : AppCompatActivity() {
     }
 
     private fun stopAlarm() {
+        // アラーム音を停止し、リソースを解放
         mediaPlayer?.apply {
             if (isPlaying) stop()
             release()
         }
         mediaPlayer = null
-        finish() // アラーム停止後にこの画面を閉じる
+
+        // afterMusic の URI を Intent に渡して CalendarActivity へ遷移
+        val afterMusicUriString = intent.getStringExtra("afterMusic")
+        val calendarIntent = Intent(this, CalendarActivity::class.java)
+        Log.d("AlarmScreenActivity", "afterMusic URI: $afterMusicUriString")
+        if (!afterMusicUriString.isNullOrEmpty()) {
+            calendarIntent.putExtra("afterMusic", afterMusicUriString)
+        }
+        startActivity(calendarIntent)
+        finish()
     }
+
+
 
     override fun onDestroy() {
         super.onDestroy()

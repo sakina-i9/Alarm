@@ -23,7 +23,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.room.Room
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,17 +30,23 @@ import java.util.*
 
 class TimesetActivity : AppCompatActivity() {
 
-    // クラスレベルで宣言する
     private lateinit var tvTime: TextView
     private lateinit var btnSelectTime: Button
 
-    // Alarm Music 用ファイル選択（永続的なアクセス権取得のため OpenDocument を使用）
+    // クラスレベルで Room データベースのインスタンスを定義（アプリ全体で1回だけ生成）
+    private val db by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            AlarmDatabase::class.java, "alarms-db"
+        ).build()
+    }
+
+    // Alarm Music 用ファイル選択（OpenDocument）
     private val audioPickerLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
             try {
-                // 永続的な読み取り権限を取得（FLAG_GRANT_READ_URI_PERMISSION を使用）
                 val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 contentResolver.takePersistableUriPermission(it, flags)
             } catch (e: Exception) {
@@ -56,7 +61,7 @@ class TimesetActivity : AppCompatActivity() {
         }
     }
 
-    // After Music 用ファイル選択（同様に OpenDocument を使用）
+    // After Music 用ファイル選択（OpenDocument）
     private val audioPickerLauncher2 = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -93,6 +98,7 @@ class TimesetActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_timeset)
 
+        // AlarmManager の設定
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (!alarmManager.canScheduleExactAlarms()) {
             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
@@ -106,6 +112,7 @@ class TimesetActivity : AppCompatActivity() {
             insets
         }
 
+        // UI 部品の初期化
         val chipSun = findViewById<Chip>(R.id.chipSun)
         val chipMon = findViewById<Chip>(R.id.chipMon)
         val chipTue = findViewById<Chip>(R.id.chipTue)
@@ -118,10 +125,10 @@ class TimesetActivity : AppCompatActivity() {
         val editAlarmName = findViewById<EditText>(R.id.Alarm_Name)
         val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
         val tvAfterMusic = findViewById<TextView>(R.id.SetAfterMusic)
-
         tvTime = findViewById(R.id.tvTime)
         btnSelectTime = findViewById(R.id.btnSelectTime)
 
+        // 編集モードの場合の初期化
         val mode = intent.getStringExtra("mode")
         if (mode == "edit") {
             val timeText = intent.getStringExtra("time")
@@ -133,7 +140,6 @@ class TimesetActivity : AppCompatActivity() {
             tvTime.text = timeText ?: ""
             editAlarmName.setText(alarmNameText ?: "")
 
-            // 編集時は、保存済みの alarmMusicText をチェック
             if (!alarmMusicText.isNullOrEmpty() && alarmMusicText.startsWith("content://")) {
                 tvAlarmMusic.text = getFileName(Uri.parse(alarmMusicText))
                 tvAlarmMusic.tag = alarmMusicText
@@ -177,21 +183,14 @@ class TimesetActivity : AppCompatActivity() {
             showTimePickerDialog()
         }
 
-        // 音声ファイル選択ボタンの設定
         val btnSelectAudio = findViewById<Button>(R.id.Alarm_Music_Button)
         btnSelectAudio.setOnClickListener {
-            // MIMEタイプ "audio/*" のファイルを選択
             audioPickerLauncher.launch(arrayOf("audio/*"))
         }
         val btnSelectAudio2 = findViewById<Button>(R.id.After_Music)
         btnSelectAudio2.setOnClickListener {
             audioPickerLauncher2.launch(arrayOf("audio/*"))
         }
-
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AlarmDatabase::class.java, "alarms-db"
-        ).build()
 
         btnSaveAlarm.setOnClickListener {
             val timeText = tvTime.text.toString()
@@ -205,7 +204,6 @@ class TimesetActivity : AppCompatActivity() {
             if (chipSat.isChecked) selectedDays.add("土")
 
             val alarmName = editAlarmName.text.toString()
-            // TextView の tag に保存した正しい URI を使用
             val alarmMusic = tvAlarmMusic.tag?.toString() ?: ""
             val afterMusic = tvAfterMusic.tag?.toString() ?: ""
 
@@ -238,7 +236,7 @@ class TimesetActivity : AppCompatActivity() {
                 runOnUiThread {
                     Toast.makeText(this@TimesetActivity, "保存完了", Toast.LENGTH_SHORT).show()
                     val targetTimeInMillis = getTargetTimeInMillisFrom(tvTime.text.toString())
-                    scheduleAlarm(targetTimeInMillis, alarm.id, alarmMusic)
+                    scheduleAlarm(targetTimeInMillis, alarm.id, alarmMusic, afterMusic)
                     startActivity(Intent(this@TimesetActivity, AlarmActivity::class.java))
                     finish()
                 }
@@ -286,10 +284,12 @@ class TimesetActivity : AppCompatActivity() {
         return calendar.timeInMillis
     }
 
-    private fun scheduleAlarm(timeInMillis: Long, alarmId: Int, alarmMusicUri: String?) {
+    // scheduleAlarm を afterMusic の URI も渡すように修正
+    private fun scheduleAlarm(timeInMillis: Long, alarmId: Int, alarmMusicUri: String?, afterMusicUri: String?) {
         val intent = Intent(this, AlarmReceiver::class.java).apply {
             putExtra("alarmId", alarmId)
             putExtra("alarmMusic", alarmMusicUri)
+            putExtra("afterMusic", afterMusicUri)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             this,
@@ -298,6 +298,10 @@ class TimesetActivity : AppCompatActivity() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            timeInMillis,
+            pendingIntent
+        )
     }
 }

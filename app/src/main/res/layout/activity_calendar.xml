@@ -6,19 +6,19 @@
     android:layout_height="match_parent"
     android:padding="8dp">
 
-    <!-- ヘッダー：前月ボタン、現在の月・年表示、翌月ボタン -->
+    <!-- ヘッダー：前月／翌月ボタンと月・年表示 -->
     <LinearLayout
-        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <Button
+        <TextView
             android:id="@+id/btnPrevMonth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="＜" />
+            android:text="＜"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/tvMonthYear"
@@ -29,67 +29,30 @@
             android:text="2025年3月"
             android:textSize="18sp" />
 
-        <Button
+        <TextView
             android:id="@+id/btnNextMonth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="＞" />
+            android:text="＞"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <!-- 曜日見出し -->
     <LinearLayout
-        android:id="@+id/weekDaysLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="8dp">
-
-        <!-- 曜日を均等に表示 -->
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="日" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="月" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="火" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="水" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="木" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="金" />
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="土" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="日" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="月" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="火" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="水" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="木" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="金" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="土" />
     </LinearLayout>
 
-    <!-- カレンダー用 GridView -->
+    <!-- GridView：カレンダーの日付を表示 -->
     <GridView
         android:id="@+id/gridViewCalendar"
         android:layout_width="match_parent"
@@ -98,5 +61,15 @@
         android:verticalSpacing="2dp"
         android:horizontalSpacing="2dp"
         android:stretchMode="columnWidth"
+        android:layout_marginTop="8dp"/>
+
+    <!-- afterMusic を停止するためのボタン（初期は非表示） -->
+    <Button
+        android:id="@+id/btnStopAfterMusic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="再生終了"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"/>
 </LinearLayout>
