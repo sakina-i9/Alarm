@@ -7,6 +7,8 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
     <application
         android:allowBackup="true"
@@ -42,7 +44,10 @@
         <activity
             android:name=".AlarmScreenActivity"
             android:exported="true"
-            android:theme="@style/Theme.Alarm" />
+            android:theme="@style/Theme.Alarm"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:launchMode="singleTask"/>
 
         <!-- Foreground Service の宣言 -->
         <service

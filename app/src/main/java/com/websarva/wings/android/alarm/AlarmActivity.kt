@@ -1,6 +1,8 @@
 package com.websarva.wings.android.alarm
+
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -16,7 +18,7 @@ import kotlinx.coroutines.launch
 
 class AlarmActivity : AppCompatActivity() {
 
-    // Room データベースをシングルトン的に生成
+    // Room データベースの初期化
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
@@ -51,12 +53,20 @@ class AlarmActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewAlarms)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 非同期で Room から全アラームを取得して RecyclerView にセット
+        // 既存の削除ボタン（アイコン）と、追加する「削除確定ボタン」と「キャンセルボタン」を取得
+        val deleteButton = findViewById<ImageButton>(R.id.alarm_delete)
+        val confirmDeleteButton = findViewById<Button>(R.id.btnConfirmDelete)
+        val cancelDeleteButton = findViewById<Button>(R.id.btnCancelDelete)
+        // 初期状態は非表示
+        confirmDeleteButton.visibility = Button.GONE
+        cancelDeleteButton.visibility = Button.GONE
+
+        // Room から Alarm リストを取得して RecyclerView にセット
         CoroutineScope(Dispatchers.IO).launch {
             val alarms = db.alarmDao().getAllAlarms()
             runOnUiThread {
                 adapter = AlarmAdapter(alarms) { alarm ->
-                    // 編集モードでない場合は、編集画面へ遷移
+                    // 編集モードでない場合は編集画面へ遷移
                     if (!isSelectionMode) {
                         val intent = Intent(this@AlarmActivity, TimesetActivity::class.java).apply {
                             putExtra("alarmId", alarm.id)
@@ -74,36 +84,52 @@ class AlarmActivity : AppCompatActivity() {
             }
         }
 
-        // 削除ボタンの設定（複数選択削除用）
-        val deleteButton = findViewById<ImageButton>(R.id.alarm_delete)
+        // 削除ボタンをタップすると選択モードに切り替え、削除確認とキャンセルボタンを表示
         deleteButton.setOnClickListener {
             if (!isSelectionMode) {
-                // まだ選択モードでなければ、選択モードに切り替える
                 isSelectionMode = true
                 adapter.selectionMode = true
                 Toast.makeText(this, "削除する項目を選択してください", Toast.LENGTH_SHORT).show()
+                confirmDeleteButton.visibility = Button.VISIBLE
+                cancelDeleteButton.visibility = Button.VISIBLE
+            }
+        }
+
+        // 削除確認ボタンの処理：選択されたアラームを削除
+        confirmDeleteButton.setOnClickListener {
+            val selectedAlarms = adapter.getSelectedAlarms()
+            if (selectedAlarms.isEmpty()) {
+                Toast.makeText(this, "削除する項目を選択してください", Toast.LENGTH_SHORT).show()
             } else {
-                // 既に選択モードの場合は、選択された項目を削除する
-                val selectedAlarms = adapter.getSelectedAlarms()
-                if (selectedAlarms.isEmpty()) {
-                    Toast.makeText(this, "削除する項目を選択してください", Toast.LENGTH_SHORT).show()
-                } else {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        selectedAlarms.forEach { alarm ->
-                            db.alarmDao().delete(alarm)
-                        }
-                        // 削除後、最新のリストを取得して RecyclerView を更新
-                        val updatedAlarms = db.alarmDao().getAllAlarms()
-                        runOnUiThread {
-                            adapter.selectionMode = false
-                            isSelectionMode = false
-                            adapter.clearSelection()
-                            adapter.updateAlarms(updatedAlarms)
-                            Toast.makeText(this@AlarmActivity, "選択されたアラームを削除しました", Toast.LENGTH_SHORT).show()
-                        }
+                CoroutineScope(Dispatchers.IO).launch {
+                    selectedAlarms.forEach { alarm ->
+                        db.alarmDao().delete(alarm)
+                    }
+                    // 削除後、最新のリストを取得して更新
+                    val updatedAlarms = db.alarmDao().getAllAlarms()
+                    runOnUiThread {
+                        adapter.selectionMode = false
+                        isSelectionMode = false
+                        adapter.clearSelection()
+                        adapter.updateAlarms(updatedAlarms)
+                        Toast.makeText(this@AlarmActivity, "選択されたアラームを削除しました", Toast.LENGTH_SHORT).show()
+                        // 削除確認とキャンセルボタンを非表示に戻す
+                        confirmDeleteButton.visibility = Button.GONE
+                        cancelDeleteButton.visibility = Button.GONE
                     }
                 }
             }
+        }
+
+        // キャンセルボタンの処理：削除をキャンセルして通常状態に戻す
+        cancelDeleteButton.setOnClickListener {
+            adapter.selectionMode = false
+            isSelectionMode = false
+            adapter.clearSelection()
+            adapter.notifyDataSetChanged()
+            Toast.makeText(this, "キャンセルしました", Toast.LENGTH_SHORT).show()
+            confirmDeleteButton.visibility = Button.GONE
+            cancelDeleteButton.visibility = Button.GONE
         }
     }
 }
