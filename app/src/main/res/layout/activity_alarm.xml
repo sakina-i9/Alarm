@@ -41,19 +41,22 @@
             android:layout_marginTop="20dp"/>
     </LinearLayout>
 
+    <!-- RecyclerView の高さを 0dp、layout_weight=1 に設定 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAlarms"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:layout_margin="16dp"/>
 
-    <!-- 削除確定ボタンレイアウト（初期状態は非表示） -->
+    <!-- 削除確認用レイアウト：初期状態は非表示 -->
     <LinearLayout
         android:id="@+id/deleteConfirmLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="16dp">
 
         <Button
             android:id="@+id/btnConfirmDelete"
@@ -65,6 +68,7 @@
             android:id="@+id/btnCancelDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:text="キャンセル" />
     </LinearLayout>
 </LinearLayout>

@@ -78,6 +78,7 @@ class AlarmActivity : AppCompatActivity() {
                             putExtra("alarmMusic", alarm.alarmMusic)
                             putExtra("afterMusic", alarm.afterMusic)
                             putExtra("mode", "edit")
+                            putExtra("enabled", alarm.enabled)
                         }
                         startActivity(intent)
                     }

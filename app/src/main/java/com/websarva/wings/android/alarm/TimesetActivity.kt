@@ -37,7 +37,7 @@ class TimesetActivity : AppCompatActivity() {
     private lateinit var btnSelectTime: Button
     private lateinit var switchEnabled: Switch
 
-    // Room データベースのインスタンス（シングルトンとして lazy 初期化）
+    // Room データベースのインスタンス（lazy 初期化）
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
@@ -52,7 +52,7 @@ class TimesetActivity : AppCompatActivity() {
             .build()
     }
 
-    // Alarm Music 用ファイル選択（OpenDocument）
+    // Alarm Music 用ファイル選択
     private val audioPickerLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -71,7 +71,7 @@ class TimesetActivity : AppCompatActivity() {
         }
     }
 
-    // After Music 用ファイル選択（OpenDocument）
+    // After Music 用ファイル選択
     private val audioPickerLauncher2 = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -122,7 +122,7 @@ class TimesetActivity : AppCompatActivity() {
             insets
         }
 
-        // UI 部品の初期化
+        // ビューの取得
         tvTime = findViewById(R.id.tvTime)
         btnSelectTime = findViewById(R.id.btnSelectTime)
         switchEnabled = findViewById(R.id.switchEnabled)
@@ -139,18 +139,20 @@ class TimesetActivity : AppCompatActivity() {
         val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
         val tvAfterMusic = findViewById<TextView>(R.id.SetAfterMusic)
 
-        // 編集モードの場合
+        btnSelectTime.setOnClickListener { showTimePickerDialog() }
+
+        val btnSelectAudio = findViewById<Button>(R.id.Alarm_Music_Button)
+        btnSelectAudio.setOnClickListener { audioPickerLauncher.launch(arrayOf("audio/*")) }
+        val btnSelectAudio2 = findViewById<Button>(R.id.After_Music)
+        btnSelectAudio2.setOnClickListener { audioPickerLauncher2.launch(arrayOf("audio/*")) }
+
+        // 編集モードの場合、インテントから各値を初期化
         val mode = intent.getStringExtra("mode")
         if (mode == "edit") {
-            val timeText = intent.getStringExtra("time")
-            val days = intent.getStringExtra("days")
-            val alarmNameText = intent.getStringExtra("alarmName")
+            tvTime.text = intent.getStringExtra("time") ?: ""
+            editAlarmName.setText(intent.getStringExtra("alarmName") ?: "")
             val alarmMusicText = intent.getStringExtra("alarmMusic")
             val afterMusicText = intent.getStringExtra("afterMusic")
-
-            tvTime.text = timeText ?: ""
-            editAlarmName.setText(alarmNameText ?: "")
-
             if (!alarmMusicText.isNullOrEmpty() && alarmMusicText.startsWith("content://")) {
                 tvAlarmMusic.text = getFileName(Uri.parse(alarmMusicText))
                 tvAlarmMusic.tag = alarmMusicText
@@ -165,6 +167,7 @@ class TimesetActivity : AppCompatActivity() {
                 tvAfterMusic.text = afterMusicText ?: ""
                 tvAfterMusic.tag = ""
             }
+            val days = intent.getStringExtra("days")
             if (!days.isNullOrEmpty()) {
                 val dayList = days.split(",")
                 chipSun.isChecked = dayList.contains("日")
@@ -175,11 +178,11 @@ class TimesetActivity : AppCompatActivity() {
                 chipFri.isChecked = dayList.contains("金")
                 chipSat.isChecked = dayList.contains("土")
             }
-            // 編集時は保存されているオン／オフ状態を反映
+            // 編集時はインテントから "enabled" も受け取る
             val enabledState = intent.getBooleanExtra("enabled", true)
             switchEnabled.isChecked = enabledState
         } else {
-            // 新規の場合はデフォルトオン
+            // 新規の場合はデフォルトでオン
             switchEnabled.isChecked = true
         }
 
@@ -195,20 +198,14 @@ class TimesetActivity : AppCompatActivity() {
             println("選択された曜日: $selectedDays")
         }
 
-        btnSelectTime.setOnClickListener {
-            showTimePickerDialog()
-        }
-
-        val btnSelectAudio = findViewById<Button>(R.id.Alarm_Music_Button)
-        btnSelectAudio.setOnClickListener {
-            audioPickerLauncher.launch(arrayOf("audio/*"))
-        }
-        val btnSelectAudio2 = findViewById<Button>(R.id.After_Music)
-        btnSelectAudio2.setOnClickListener {
-            audioPickerLauncher2.launch(arrayOf("audio/*"))
-        }
-
         btnSaveAlarm.setOnClickListener {
+
+            // 時刻が未設定の場合、エラーメッセージを表示して処理中断
+            if (tvTime.text.isNullOrBlank() || tvTime.text.toString() == "00:00") {
+                Toast.makeText(this, "有効な時刻を選択してください", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val timeText = tvTime.text.toString()
             val selectedDays = mutableListOf<String>()
             if (chipSun.isChecked) selectedDays.add("日")
@@ -224,7 +221,7 @@ class TimesetActivity : AppCompatActivity() {
             val afterMusic = tvAfterMusic.tag?.toString() ?: ""
             val enabled = switchEnabled.isChecked
 
-            val alarm = if (intent.getStringExtra("mode") == "edit") {
+            val alarm = if (mode == "edit") {
                 val alarmId = intent.getIntExtra("alarmId", -1)
                 Alarm(
                     id = alarmId,
@@ -247,7 +244,7 @@ class TimesetActivity : AppCompatActivity() {
             }
 
             CoroutineScope(Dispatchers.IO).launch {
-                if (intent.getStringExtra("mode") == "edit") {
+                if (mode == "edit") {
                     db.alarmDao().update(alarm)
                 } else {
                     db.alarmDao().insert(alarm)
@@ -305,12 +302,10 @@ class TimesetActivity : AppCompatActivity() {
 
     // scheduleAlarm 関数：enabled 状態と曜日指定を考慮してアラームをセットする
     private fun scheduleAlarm(timeInMillis: Long, alarm: Alarm) {
-        // オフ状態ならスケジュールしない
         if (!alarm.enabled) {
             Log.d("TimesetActivity", "Alarm disabled, not scheduling")
             return
         }
-        // 曜日指定がある場合、今日の曜日が含まれているかチェック
         if (alarm.days.isNotEmpty()) {
             val today = SimpleDateFormat("E", Locale.JAPAN).format(Calendar.getInstance().time)
             val dayList = alarm.days.split(",")
