@@ -22,10 +22,12 @@ class AlarmActivity : AppCompatActivity() {
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
-            AlarmDatabase::class.java,
-            "alarms-db"
-        ).build()
+            AlarmDatabase::class.java, "alarms-db"
+        )
+            .addMigrations(AlarmDatabase.MIGRATION_1_2, AlarmDatabase.MIGRATION_2_3, AlarmDatabase.MIGRATION_3_4)
+            .build()
     }
+
 
     private lateinit var adapter: AlarmAdapter
     private var isSelectionMode = false

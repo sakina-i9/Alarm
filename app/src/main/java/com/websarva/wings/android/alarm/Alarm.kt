@@ -10,5 +10,6 @@ data class Alarm(
     val days: String,      // 例："日,月,火"
     val alarmName: String,
     val alarmMusic: String,
-    val afterMusic: String
+    val afterMusic: String,
+    val enabled: Boolean = true
 )

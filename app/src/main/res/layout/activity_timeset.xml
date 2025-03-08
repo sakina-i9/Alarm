@@ -9,6 +9,7 @@
     android:orientation="vertical"
     tools:context=".TimesetActivity">
 
+    <!-- 現在時刻表示 -->
     <TextView
         android:id="@+id/tvTime"
         android:layout_width="wrap_content"
@@ -18,14 +19,24 @@
         android:text="00:00"
         android:textSize="60sp" />
 
-
+    <!-- 時刻選択ボタン -->
     <Button
         android:id="@+id/btnSelectTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="150dp"
-        android:text="時刻の設定"/>
+        android:text="時刻の設定" />
 
+    <!-- オン／オフスイッチを追加 -->
+    <Switch
+        android:id="@+id/switchEnabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/switch_button"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center" />
+
+    <!-- 曜日選択用 ChipGroup -->
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chipGroupDays"
         android:layout_width="wrap_content"
@@ -92,6 +103,7 @@
 
     </com.google.android.material.chip.ChipGroup>
 
+    <!-- 確認ボタン -->
     <Button
         android:id="@+id/btnCheckDays"
         android:layout_width="wrap_content"
@@ -100,6 +112,7 @@
         android:text="@string/kakunin"
         android:layout_gravity="center"/>
 
+    <!-- アラーム名入力 -->
     <EditText
         android:id="@+id/Alarm_Name"
         android:layout_width="match_parent"
@@ -108,12 +121,13 @@
         android:background="@android:drawable/edit_text"
         android:hint="@string/TimeName" />
 
+    <!-- アラーム音設定 -->
     <TextView
         android:id="@+id/Set_Alarm_Music"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:text="@string/setAlarmName"/>
 
     <Button
@@ -121,15 +135,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/AlarmMusic"/>
-    
+
+    <!-- AfterMusic 設定 -->
     <TextView
         android:id="@+id/SetAfterMusic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:layout_marginTop="20dp"
         android:text="@string/setAfterMusicName"/>
-
 
     <Button
         android:id="@+id/After_Music"
@@ -137,13 +151,13 @@
         android:layout_height="wrap_content"
         android:text="@string/AfterMusic"/>
 
+    <!-- 保存ボタン -->
     <Button
         android:id="@+id/btnSaveAlarm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:text="@string/save"/>
-
 
 </LinearLayout>

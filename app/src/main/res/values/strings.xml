@@ -18,4 +18,7 @@
     <string name="setAfterMusicName">選択した音声</string>
     <string name="save">保存</string>
     <string name="delete">削除する</string>
+    <string name="switch_button">アラーム Off/On</string>
+    <string name="alarm_switch">Off/On</string>
+    <string name="alarm_information">アラームの情報</string>
 </resources>

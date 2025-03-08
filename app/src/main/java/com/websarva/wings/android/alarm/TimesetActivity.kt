@@ -11,9 +11,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -26,19 +28,28 @@ import com.google.android.material.chip.Chip
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.*
 
 class TimesetActivity : AppCompatActivity() {
 
     private lateinit var tvTime: TextView
     private lateinit var btnSelectTime: Button
+    private lateinit var switchEnabled: Switch
 
-    // クラスレベルで Room データベースのインスタンスを定義（アプリ全体で1回だけ生成）
+    // Room データベースのインスタンス（シングルトンとして lazy 初期化）
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
-            AlarmDatabase::class.java, "alarms-db"
-        ).build()
+            AlarmDatabase::class.java,
+            "alarms-db"
+        )
+            .addMigrations(
+                AlarmDatabase.MIGRATION_1_2,
+                AlarmDatabase.MIGRATION_2_3,
+                AlarmDatabase.MIGRATION_3_4
+            )
+            .build()
     }
 
     // Alarm Music 用ファイル選択（OpenDocument）
@@ -56,7 +67,6 @@ class TimesetActivity : AppCompatActivity() {
             Toast.makeText(this, "選択された音声ファイル: $it", Toast.LENGTH_SHORT).show()
             val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
             tvAlarmMusic.text = fileName ?: "不明なファイル名"
-            // 実際のURI文字列を tag に保存
             tvAlarmMusic.tag = it.toString()
         }
     }
@@ -113,6 +123,9 @@ class TimesetActivity : AppCompatActivity() {
         }
 
         // UI 部品の初期化
+        tvTime = findViewById(R.id.tvTime)
+        btnSelectTime = findViewById(R.id.btnSelectTime)
+        switchEnabled = findViewById(R.id.switchEnabled)
         val chipSun = findViewById<Chip>(R.id.chipSun)
         val chipMon = findViewById<Chip>(R.id.chipMon)
         val chipTue = findViewById<Chip>(R.id.chipTue)
@@ -125,10 +138,8 @@ class TimesetActivity : AppCompatActivity() {
         val editAlarmName = findViewById<EditText>(R.id.Alarm_Name)
         val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
         val tvAfterMusic = findViewById<TextView>(R.id.SetAfterMusic)
-        tvTime = findViewById(R.id.tvTime)
-        btnSelectTime = findViewById(R.id.btnSelectTime)
 
-        // 編集モードの場合の初期化
+        // 編集モードの場合
         val mode = intent.getStringExtra("mode")
         if (mode == "edit") {
             val timeText = intent.getStringExtra("time")
@@ -154,7 +165,6 @@ class TimesetActivity : AppCompatActivity() {
                 tvAfterMusic.text = afterMusicText ?: ""
                 tvAfterMusic.tag = ""
             }
-
             if (!days.isNullOrEmpty()) {
                 val dayList = days.split(",")
                 chipSun.isChecked = dayList.contains("日")
@@ -165,6 +175,12 @@ class TimesetActivity : AppCompatActivity() {
                 chipFri.isChecked = dayList.contains("金")
                 chipSat.isChecked = dayList.contains("土")
             }
+            // 編集時は保存されているオン／オフ状態を反映
+            val enabledState = intent.getBooleanExtra("enabled", true)
+            switchEnabled.isChecked = enabledState
+        } else {
+            // 新規の場合はデフォルトオン
+            switchEnabled.isChecked = true
         }
 
         btnCheckDays.setOnClickListener {
@@ -206,8 +222,9 @@ class TimesetActivity : AppCompatActivity() {
             val alarmName = editAlarmName.text.toString()
             val alarmMusic = tvAlarmMusic.tag?.toString() ?: ""
             val afterMusic = tvAfterMusic.tag?.toString() ?: ""
+            val enabled = switchEnabled.isChecked
 
-            val alarm = if (mode == "edit") {
+            val alarm = if (intent.getStringExtra("mode") == "edit") {
                 val alarmId = intent.getIntExtra("alarmId", -1)
                 Alarm(
                     id = alarmId,
@@ -215,7 +232,8 @@ class TimesetActivity : AppCompatActivity() {
                     days = selectedDays.joinToString(","),
                     alarmName = alarmName,
                     alarmMusic = alarmMusic,
-                    afterMusic = afterMusic
+                    afterMusic = afterMusic,
+                    enabled = enabled
                 )
             } else {
                 Alarm(
@@ -223,20 +241,21 @@ class TimesetActivity : AppCompatActivity() {
                     days = selectedDays.joinToString(","),
                     alarmName = alarmName,
                     alarmMusic = alarmMusic,
-                    afterMusic = afterMusic
+                    afterMusic = afterMusic,
+                    enabled = enabled
                 )
             }
 
             CoroutineScope(Dispatchers.IO).launch {
-                if (mode == "edit") {
+                if (intent.getStringExtra("mode") == "edit") {
                     db.alarmDao().update(alarm)
                 } else {
                     db.alarmDao().insert(alarm)
                 }
                 runOnUiThread {
                     Toast.makeText(this@TimesetActivity, "保存完了", Toast.LENGTH_SHORT).show()
-                    val targetTimeInMillis = getTargetTimeInMillisFrom(tvTime.text.toString())
-                    scheduleAlarm(targetTimeInMillis, alarm.id, alarmMusic, afterMusic)
+                    val targetTimeInMillis = getTargetTimeInMillisFrom(timeText)
+                    scheduleAlarm(targetTimeInMillis, alarm)
                     startActivity(Intent(this@TimesetActivity, AlarmActivity::class.java))
                     finish()
                 }
@@ -284,24 +303,34 @@ class TimesetActivity : AppCompatActivity() {
         return calendar.timeInMillis
     }
 
-    // scheduleAlarm を afterMusic の URI も渡すように修正
-    private fun scheduleAlarm(timeInMillis: Long, alarmId: Int, alarmMusicUri: String?, afterMusicUri: String?) {
+    // scheduleAlarm 関数：enabled 状態と曜日指定を考慮してアラームをセットする
+    private fun scheduleAlarm(timeInMillis: Long, alarm: Alarm) {
+        // オフ状態ならスケジュールしない
+        if (!alarm.enabled) {
+            Log.d("TimesetActivity", "Alarm disabled, not scheduling")
+            return
+        }
+        // 曜日指定がある場合、今日の曜日が含まれているかチェック
+        if (alarm.days.isNotEmpty()) {
+            val today = SimpleDateFormat("E", Locale.JAPAN).format(Calendar.getInstance().time)
+            val dayList = alarm.days.split(",")
+            if (!dayList.contains(today)) {
+                Log.d("TimesetActivity", "Today ($today) is not in alarm.days, not scheduling")
+                return
+            }
+        }
         val intent = Intent(this, AlarmReceiver::class.java).apply {
-            putExtra("alarmId", alarmId)
-            putExtra("alarmMusic", alarmMusicUri)
-            putExtra("afterMusic", afterMusicUri)
+            putExtra("alarmId", alarm.id)
+            putExtra("alarmMusic", alarm.alarmMusic)
+            putExtra("afterMusic", alarm.afterMusic)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             this,
-            alarmId,
+            alarm.id,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            timeInMillis,
-            pendingIntent
-        )
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
     }
 }
