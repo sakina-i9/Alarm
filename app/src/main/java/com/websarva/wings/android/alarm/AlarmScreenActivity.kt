@@ -16,13 +16,9 @@ class AlarmScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val afterMusicUriString = intent.getStringExtra("afterMusic")
-        Log.d("AlarmScreenActivity", "afterMusic URI: $afterMusicUriString")
-
         // ロック状態でも画面を表示する設定
         setShowWhenLocked(true)
         setTurnScreenOn(true)
-        // さらに必要なら Window フラグを追加
         window.addFlags(
             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
@@ -32,11 +28,13 @@ class AlarmScreenActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_alarm_screen)
 
-        // 呼び出し元（例：AlarmReceiver）から渡されたExtrasを取得
+        // AlarmReceiver から受け取ったExtrasの取得
         val alarmMusicUriString = intent.getStringExtra("alarmMusic")
+        val afterMusicUriString = intent.getStringExtra("afterMusic")
         Log.d("AlarmScreenActivity", "Received alarmMusic URI: $alarmMusicUriString")
+        Log.d("AlarmScreenActivity", "afterMusic URI: $afterMusicUriString")
 
-        // 指定された音源のURIがあればそれを、なければデフォルトの音源を再生
+        // アラーム音の再生
         mediaPlayer = if (!alarmMusicUriString.isNullOrEmpty()) {
             try {
                 MediaPlayer.create(this, Uri.parse(alarmMusicUriString))
@@ -49,9 +47,12 @@ class AlarmScreenActivity : AppCompatActivity() {
         }
 
         mediaPlayer?.apply {
-            isLooping = true  // 必要に応じてループ再生
+            isLooping = true
             start()
         }
+
+        // 振動開始（Persistent vibration を実行）
+        startPersistentVibration(this)
 
         // 停止ボタンの処理
         findViewById<Button>(R.id.btnStopAlarm).setOnClickListener {
@@ -60,14 +61,17 @@ class AlarmScreenActivity : AppCompatActivity() {
     }
 
     private fun stopAlarm() {
-        // アラーム音を停止し、リソースを解放
+        // アラーム音の停止とリソース解放
         mediaPlayer?.apply {
             if (isPlaying) stop()
             release()
         }
         mediaPlayer = null
 
-        // afterMusic の URI を Intent に渡して CalendarActivity へ遷移
+        // 振動停止
+        stopVibration(this)
+
+        // afterMusicが設定されている場合は次の画面へ遷移（例：CalendarActivity）
         val afterMusicUriString = intent.getStringExtra("afterMusic")
         val calendarIntent = Intent(this, CalendarActivity::class.java)
         Log.d("AlarmScreenActivity", "afterMusic URI: $afterMusicUriString")
@@ -78,12 +82,10 @@ class AlarmScreenActivity : AppCompatActivity() {
         finish()
     }
 
-
-
     override fun onDestroy() {
         super.onDestroy()
         mediaPlayer?.release()
         mediaPlayer = null
+        stopVibration(this)
     }
-
 }

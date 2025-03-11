@@ -9,6 +9,14 @@
     android:orientation="vertical"
     tools:context=".AlarmActivity">
 
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/back"
+        android:layout_marginTop="16dp" />
+
+
     <TextClock
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -69,6 +77,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="キャンセル" />
+            android:text="@string/cancel" />
     </LinearLayout>
 </LinearLayout>

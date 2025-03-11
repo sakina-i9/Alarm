@@ -108,6 +108,13 @@ class TimesetActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_timeset)
 
+        // 戻るボタンの設定
+        val btnBack = findViewById<Button>(R.id.btnBack)
+        btnBack.setOnClickListener {
+            // 前の画面に戻る
+            finish()
+        }
+
         // AlarmManager の設定
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (!alarmManager.canScheduleExactAlarms()) {
@@ -133,7 +140,6 @@ class TimesetActivity : AppCompatActivity() {
         val chipThu = findViewById<Chip>(R.id.chipThu)
         val chipFri = findViewById<Chip>(R.id.chipFri)
         val chipSat = findViewById<Chip>(R.id.chipSat)
-        val btnCheckDays = findViewById<Button>(R.id.btnCheckDays)
         val btnSaveAlarm = findViewById<Button>(R.id.btnSaveAlarm)
         val editAlarmName = findViewById<EditText>(R.id.Alarm_Name)
         val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
@@ -184,18 +190,6 @@ class TimesetActivity : AppCompatActivity() {
         } else {
             // 新規の場合はデフォルトでオン
             switchEnabled.isChecked = true
-        }
-
-        btnCheckDays.setOnClickListener {
-            val selectedDays = mutableListOf<String>()
-            if (chipSun.isChecked) selectedDays.add("日")
-            if (chipMon.isChecked) selectedDays.add("月")
-            if (chipTue.isChecked) selectedDays.add("火")
-            if (chipWed.isChecked) selectedDays.add("水")
-            if (chipThu.isChecked) selectedDays.add("木")
-            if (chipFri.isChecked) selectedDays.add("金")
-            if (chipSat.isChecked) selectedDays.add("土")
-            println("選択された曜日: $selectedDays")
         }
 
         btnSaveAlarm.setOnClickListener {

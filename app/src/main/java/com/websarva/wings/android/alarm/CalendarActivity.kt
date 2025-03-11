@@ -50,6 +50,13 @@ class CalendarActivity : AppCompatActivity() {
         // 初期状態は非表示
         btnStopAfterMusic.visibility = Button.GONE
 
+        // 戻るボタンの設定
+        val btnBack = findViewById<Button>(R.id.btnBack)
+        btnBack.setOnClickListener {
+            // 前の画面に戻る
+            finish()
+        }
+
         // Room データベースの作成（マイグレーションも登録）
         db = Room.databaseBuilder(applicationContext, AlarmDatabase::class.java, "alarms-db")
             .addMigrations(AlarmDatabase.MIGRATION_1_2, AlarmDatabase.MIGRATION_2_3)

@@ -21,4 +21,11 @@
     <string name="switch_button">アラーム Off/On</string>
     <string name="alarm_switch">Off/On</string>
     <string name="alarm_information">アラームの情報</string>
+    <string name="back">戻る</string>
+    <string name="cancel">キャンセル</string>
+    <string name="Time_setting">時刻の設定</string>
+    <string name="start">Alarm!</string>
+    <string name="stopBtn">Stop Alarm</string>
+    <string name="setBackgroundName">アラーム起動時の背景画面</string>
+    <string name="chooseBackground">背景</string>
 </resources>

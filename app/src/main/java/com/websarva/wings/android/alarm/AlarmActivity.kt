@@ -58,6 +58,13 @@ class AlarmActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // 戻るボタンの設定
+        val btnBack = findViewById<Button>(R.id.btnBack)
+        btnBack.setOnClickListener {
+            // 前の画面に戻る
+            finish()
+        }
+
         // RecyclerView の設定
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewAlarms)
         recyclerView.layoutManager = LinearLayoutManager(this)

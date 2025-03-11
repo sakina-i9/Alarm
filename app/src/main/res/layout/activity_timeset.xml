@@ -1,163 +1,178 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+    android:id="@+id/mainScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".TimesetActivity">
-
-    <!-- 現在時刻表示 -->
-    <TextView
-        android:id="@+id/tvTime"
-        android:layout_width="wrap_content"
-        android:layout_height="185dp"
-        android:layout_marginStart="135dp"
-        android:layout_marginTop="40dp"
-        android:text="00:00"
-        android:textSize="60sp" />
-
-    <!-- 時刻選択ボタン -->
-    <Button
-        android:id="@+id/btnSelectTime"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="150dp"
-        android:text="時刻の設定" />
+        android:orientation="vertical"
+        tools:context=".TimesetActivity">
 
-    <!-- オン／オフスイッチを追加 -->
-    <Switch
-        android:id="@+id/switchEnabled"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/switch_button"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center" />
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back"
+            android:layout_marginTop="16dp" />
 
-    <!-- 曜日選択用 ChipGroup -->
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupDays"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:singleSelection="false"
-        android:gravity="center_horizontal">
 
-        <LinearLayout
+        <!-- 現在時刻表示 -->
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
+            android:layout_height="185dp"
+            android:layout_marginStart="135dp"
+            android:layout_marginTop="40dp"
+            android:text="00:00"
+            android:textSize="60sp" />
+
+        <!-- 時刻選択ボタン -->
+        <Button
+            android:id="@+id/btnSelectTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="150dp"
+            android:text="時刻の設定" />
+
+        <!-- オン／オフスイッチを追加 -->
+        <Switch
+            android:id="@+id/switchEnabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/switch_button"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center" />
+
+        <!-- 曜日選択用 ChipGroup -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupDays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:singleSelection="false"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSun"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/niti"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMon"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/getu"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipTue"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ka"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipWed"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sui"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipThu"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/moku"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFri"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/kin"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSat"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dou"/>
+
+            </LinearLayout>
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- 確認ボタン -->
+        <Button
+            android:id="@+id/btnCheckDays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/kakunin"
+            android:layout_gravity="center"/>
+
+        <!-- アラーム名入力 -->
+        <EditText
+            android:id="@+id/Alarm_Name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:layout_marginTop="8dp"
+            android:background="@android:drawable/edit_text"
+            android:hint="@string/TimeName" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSun"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/niti"/>
+        <!-- アラーム音設定 -->
+        <TextView
+            android:id="@+id/Set_Alarm_Music"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textSize="20sp"
+            android:text="@string/setAlarmName"/>
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipMon"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/getu"/>
+        <Button
+            android:id="@+id/Alarm_Music_Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/AlarmMusic"/>
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipTue"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ka"/>
+        <!-- AfterMusic 設定 -->
+        <TextView
+            android:id="@+id/SetAfterMusic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:layout_marginTop="20dp"
+            android:text="@string/setAfterMusicName"/>
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipWed"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sui"/>
+        <Button
+            android:id="@+id/After_Music"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/AfterMusic"/>
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipThu"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/moku"/>
+        <!-- 保存ボタン -->
+        <Button
+            android:id="@+id/btnSaveAlarm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textSize="20sp"
+            android:text="@string/save"/>
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipFri"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/kin"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSat"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dou"/>
-
-        </LinearLayout>
-
-    </com.google.android.material.chip.ChipGroup>
-
-    <!-- 確認ボタン -->
-    <Button
-        android:id="@+id/btnCheckDays"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/kakunin"
-        android:layout_gravity="center"/>
-
-    <!-- アラーム名入力 -->
-    <EditText
-        android:id="@+id/Alarm_Name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="@android:drawable/edit_text"
-        android:hint="@string/TimeName" />
-
-    <!-- アラーム音設定 -->
-    <TextView
-        android:id="@+id/Set_Alarm_Music"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:textSize="20sp"
-        android:text="@string/setAlarmName"/>
-
-    <Button
-        android:id="@+id/Alarm_Music_Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/AlarmMusic"/>
-
-    <!-- AfterMusic 設定 -->
-    <TextView
-        android:id="@+id/SetAfterMusic"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"
-        android:text="@string/setAfterMusicName"/>
-
-    <Button
-        android:id="@+id/After_Music"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/AfterMusic"/>
-
-    <!-- 保存ボタン -->
-    <Button
-        android:id="@+id/btnSaveAlarm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:textSize="20sp"
-        android:text="@string/save"/>
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
