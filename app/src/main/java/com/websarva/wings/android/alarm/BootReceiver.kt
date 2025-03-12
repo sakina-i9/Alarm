@@ -29,7 +29,8 @@ class BootReceiver : BroadcastReceiver() {
                 .addMigrations(
                     AlarmDatabase.MIGRATION_1_2,
                     AlarmDatabase.MIGRATION_2_3,
-                    AlarmDatabase.MIGRATION_3_4
+                    AlarmDatabase.MIGRATION_3_4,
+                    AlarmDatabase.MIGRATION_4_5
                 )
                 .build()
 

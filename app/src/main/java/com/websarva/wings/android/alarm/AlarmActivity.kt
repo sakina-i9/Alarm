@@ -31,7 +31,8 @@ class AlarmActivity : AppCompatActivity() {
             .addMigrations(
                 AlarmDatabase.MIGRATION_1_2,
                 AlarmDatabase.MIGRATION_2_3,
-                AlarmDatabase.MIGRATION_3_4
+                AlarmDatabase.MIGRATION_3_4,
+                AlarmDatabase.MIGRATION_4_5
             )
             .build()
     }
@@ -61,7 +62,6 @@ class AlarmActivity : AppCompatActivity() {
         // 戻るボタンの設定
         val btnBack = findViewById<Button>(R.id.btnBack)
         btnBack.setOnClickListener {
-            // 前の画面に戻る
             finish()
         }
 
@@ -69,7 +69,7 @@ class AlarmActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewAlarms)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // 既存の削除ボタン（アイコン）と、「削除確定」・「キャンセル」ボタンを取得
+        // 削除ボタンや削除確認・キャンセルボタンの取得
         val deleteButton = findViewById<ImageButton>(R.id.alarm_delete)
         val confirmDeleteButton = findViewById<Button>(R.id.btnConfirmDelete)
         val cancelDeleteButton = findViewById<Button>(R.id.btnCancelDelete)
@@ -91,6 +91,8 @@ class AlarmActivity : AppCompatActivity() {
                                 putExtra("alarmName", alarm.alarmName)
                                 putExtra("alarmMusic", alarm.alarmMusic)
                                 putExtra("afterMusic", alarm.afterMusic)
+                                // 背景画像のURIも渡す
+                                putExtra("backgroundUri", alarm.backgroundUri)
                                 putExtra("mode", "edit")
                                 putExtra("enabled", alarm.enabled)
                             }
@@ -98,13 +100,11 @@ class AlarmActivity : AppCompatActivity() {
                         }
                     },
                     onToggleChange = { alarm, isChecked ->
-                        // Switch の状態変更に応じて Alarm の enabled 状態を更新
                         val updatedAlarm = alarm.copy(enabled = isChecked)
                         CoroutineScope(Dispatchers.IO).launch {
                             db.alarmDao().update(updatedAlarm)
                             if (isChecked) {
-                                // ON の場合：必要に応じて再スケジュール
-                                // ※例: targetTimeInMillis の計算後、scheduleAlarm(targetTimeInMillis, updatedAlarm) を呼び出す
+                                // ON の場合：必要に応じて再スケジュールする処理
                             } else {
                                 // OFF の場合：PendingIntent をキャンセルしてアラーム停止
                                 val intent = Intent(this@AlarmActivity, AlarmReceiver::class.java).apply {
@@ -147,7 +147,6 @@ class AlarmActivity : AppCompatActivity() {
                     selectedAlarms.forEach { alarm ->
                         db.alarmDao().delete(alarm)
                     }
-                    // 最新のリストを取得して更新
                     val updatedAlarms = db.alarmDao().getAllAlarms()
                     runOnUiThread {
                         adapter.selectionMode = false

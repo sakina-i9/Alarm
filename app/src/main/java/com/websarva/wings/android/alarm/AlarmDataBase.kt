@@ -5,8 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-// バージョンを 4 に変更
-@Database(entities = [Alarm::class, CalendarEvent::class], version = 4)
+@Database(entities = [Alarm::class, CalendarEvent::class], version = 5)
 abstract class AlarmDatabase : RoomDatabase() {
     abstract fun alarmDao(): AlarmDao
     abstract fun calendarEventDao(): CalendarEventDao
@@ -44,12 +43,18 @@ abstract class AlarmDatabase : RoomDatabase() {
             }
         }
 
-        // MIGRATION from 3 to 4: Alarmテーブルに enabled 列を追加（デフォルトは1＝true）
+        // MIGRATION from 3 to 4: Alarm テーブルに enabled 列を追加（デフォルトは1＝true）
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE alarms ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1")
             }
         }
+
+        // MIGRATION from 4 to 5: Alarm テーブルに backgroundUri 列を追加（デフォルトは空文字列）
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE alarms ADD COLUMN backgroundUri TEXT NOT NULL DEFAULT ''")
+            }
+        }
     }
 }
-

@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
@@ -36,6 +35,7 @@ class TimesetActivity : AppCompatActivity() {
     private lateinit var tvTime: TextView
     private lateinit var btnSelectTime: Button
     private lateinit var switchEnabled: Switch
+    private lateinit var btnSelectBackground: Button  // 追加：背景画像選択ボタン
 
     // Room データベースのインスタンス（lazy 初期化）
     private val db by lazy {
@@ -47,7 +47,8 @@ class TimesetActivity : AppCompatActivity() {
             .addMigrations(
                 AlarmDatabase.MIGRATION_1_2,
                 AlarmDatabase.MIGRATION_2_3,
-                AlarmDatabase.MIGRATION_3_4
+                AlarmDatabase.MIGRATION_3_4,
+                AlarmDatabase.MIGRATION_4_5
             )
             .build()
     }
@@ -90,6 +91,25 @@ class TimesetActivity : AppCompatActivity() {
         }
     }
 
+    // 背景画像選択用
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            try {
+                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(it, flags)
+            } catch (e: Exception) {
+                Toast.makeText(this, "背景画像の権限取得に失敗しました: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+            val fileName = getFileName(it)
+            val tvBackground = findViewById<TextView>(R.id.Set_Background)
+            tvBackground.text = fileName ?: "不明なファイル名"
+            tvBackground.tag = it.toString()
+            Log.d("TimesetActivity", "選択された背景画像URI: ${tvBackground.tag}")
+        }
+    }
+
     private fun getFileName(uri: Uri): String? {
         var fileName: String? = null
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
@@ -110,10 +130,7 @@ class TimesetActivity : AppCompatActivity() {
 
         // 戻るボタンの設定
         val btnBack = findViewById<Button>(R.id.btnBack)
-        btnBack.setOnClickListener {
-            // 前の画面に戻る
-            finish()
-        }
+        btnBack.setOnClickListener { finish() }
 
         // AlarmManager の設定
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -144,21 +161,28 @@ class TimesetActivity : AppCompatActivity() {
         val editAlarmName = findViewById<EditText>(R.id.Alarm_Name)
         val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
         val tvAfterMusic = findViewById<TextView>(R.id.SetAfterMusic)
+        // 背景画像プレビュー TextView と背景画像選択ボタン
+        val tvBackground = findViewById<TextView>(R.id.Set_Background)
+        btnSelectBackground = findViewById(R.id.btnSelectBackground)
+
+        btnSelectBackground.setOnClickListener {
+            imagePickerLauncher.launch(arrayOf("image/*"))
+        }
 
         btnSelectTime.setOnClickListener { showTimePickerDialog() }
+        findViewById<Button>(R.id.Alarm_Music_Button).setOnClickListener { audioPickerLauncher.launch(arrayOf("audio/*")) }
+        findViewById<Button>(R.id.After_Music).setOnClickListener { audioPickerLauncher2.launch(arrayOf("audio/*")) }
+        btnSelectBackground.setOnClickListener { imagePickerLauncher.launch(arrayOf("image/*")) }
 
-        val btnSelectAudio = findViewById<Button>(R.id.Alarm_Music_Button)
-        btnSelectAudio.setOnClickListener { audioPickerLauncher.launch(arrayOf("audio/*")) }
-        val btnSelectAudio2 = findViewById<Button>(R.id.After_Music)
-        btnSelectAudio2.setOnClickListener { audioPickerLauncher2.launch(arrayOf("audio/*")) }
-
-        // 編集モードの場合、インテントから各値を初期化
+        // 編集モードの場合の初期化
         val mode = intent.getStringExtra("mode")
         if (mode == "edit") {
             tvTime.text = intent.getStringExtra("time") ?: ""
             editAlarmName.setText(intent.getStringExtra("alarmName") ?: "")
             val alarmMusicText = intent.getStringExtra("alarmMusic")
             val afterMusicText = intent.getStringExtra("afterMusic")
+            val backgroundText = intent.getStringExtra("backgroundUri")
+            Log.d("TimesetActivity", "読み出された背景画像URI: $backgroundText")
             if (!alarmMusicText.isNullOrEmpty() && alarmMusicText.startsWith("content://")) {
                 tvAlarmMusic.text = getFileName(Uri.parse(alarmMusicText))
                 tvAlarmMusic.tag = alarmMusicText
@@ -173,6 +197,13 @@ class TimesetActivity : AppCompatActivity() {
                 tvAfterMusic.text = afterMusicText ?: ""
                 tvAfterMusic.tag = ""
             }
+            if (!backgroundText.isNullOrEmpty() && backgroundText.startsWith("content://")) {
+                tvBackground.text = getFileName(Uri.parse(backgroundText))
+                tvBackground.tag = backgroundText
+            } else {
+                tvBackground.text = backgroundText ?: "背景未設定"
+                tvBackground.tag = ""
+            }
             val days = intent.getStringExtra("days")
             if (!days.isNullOrEmpty()) {
                 val dayList = days.split(",")
@@ -184,22 +215,20 @@ class TimesetActivity : AppCompatActivity() {
                 chipFri.isChecked = dayList.contains("金")
                 chipSat.isChecked = dayList.contains("土")
             }
-            // 編集時はインテントから "enabled" も受け取る
             val enabledState = intent.getBooleanExtra("enabled", true)
             switchEnabled.isChecked = enabledState
         } else {
-            // 新規の場合はデフォルトでオン
             switchEnabled.isChecked = true
+            tvBackground.text = "背景未設定"
+            tvBackground.tag = ""
         }
 
         btnSaveAlarm.setOnClickListener {
-
-            // 時刻が未設定の場合、エラーメッセージを表示して処理中断
+            // 時刻が未設定の場合は処理中断
             if (tvTime.text.isNullOrBlank() || tvTime.text.toString() == "00:00") {
                 Toast.makeText(this, "有効な時刻を選択してください", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             val timeText = tvTime.text.toString()
             val selectedDays = mutableListOf<String>()
             if (chipSun.isChecked) selectedDays.add("日")
@@ -213,6 +242,7 @@ class TimesetActivity : AppCompatActivity() {
             val alarmName = editAlarmName.text.toString()
             val alarmMusic = tvAlarmMusic.tag?.toString() ?: ""
             val afterMusic = tvAfterMusic.tag?.toString() ?: ""
+            val backgroundUri = tvBackground.tag?.toString() ?: ""
             val enabled = switchEnabled.isChecked
 
             val alarm = if (mode == "edit") {
@@ -224,6 +254,7 @@ class TimesetActivity : AppCompatActivity() {
                     alarmName = alarmName,
                     alarmMusic = alarmMusic,
                     afterMusic = afterMusic,
+                    backgroundUri = backgroundUri,
                     enabled = enabled
                 )
             } else {
@@ -233,6 +264,7 @@ class TimesetActivity : AppCompatActivity() {
                     alarmName = alarmName,
                     alarmMusic = alarmMusic,
                     afterMusic = afterMusic,
+                    backgroundUri = backgroundUri,
                     enabled = enabled
                 )
             }
@@ -294,7 +326,6 @@ class TimesetActivity : AppCompatActivity() {
         return calendar.timeInMillis
     }
 
-    // scheduleAlarm 関数：enabled 状態と曜日指定を考慮してアラームをセットする
     private fun scheduleAlarm(timeInMillis: Long, alarm: Alarm) {
         if (!alarm.enabled) {
             Log.d("TimesetActivity", "Alarm disabled, not scheduling")
@@ -312,6 +343,7 @@ class TimesetActivity : AppCompatActivity() {
             putExtra("alarmId", alarm.id)
             putExtra("alarmMusic", alarm.alarmMusic)
             putExtra("afterMusic", alarm.afterMusic)
+            putExtra("backgroundUri", alarm.backgroundUri)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             this,

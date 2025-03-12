@@ -11,5 +11,6 @@ data class Alarm(
     val alarmName: String,
     val alarmMusic: String,
     val afterMusic: String,
+    val backgroundUri: String,  // 背景画像の URI を保存
     val enabled: Boolean = true
 )
