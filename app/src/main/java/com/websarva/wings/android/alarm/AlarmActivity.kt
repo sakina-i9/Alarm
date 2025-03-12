@@ -18,6 +18,7 @@ import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.websarva.wings.android.alarm.AlarmUtils  // AlarmUtils をインポート
 
 class AlarmActivity : AppCompatActivity() {
 
@@ -91,7 +92,6 @@ class AlarmActivity : AppCompatActivity() {
                                 putExtra("alarmName", alarm.alarmName)
                                 putExtra("alarmMusic", alarm.alarmMusic)
                                 putExtra("afterMusic", alarm.afterMusic)
-                                // 背景画像のURIも渡す
                                 putExtra("backgroundUri", alarm.backgroundUri)
                                 putExtra("mode", "edit")
                                 putExtra("enabled", alarm.enabled)
@@ -105,6 +105,8 @@ class AlarmActivity : AppCompatActivity() {
                             db.alarmDao().update(updatedAlarm)
                             if (isChecked) {
                                 // ON の場合：必要に応じて再スケジュールする処理
+                                val targetTimeInMillis = AlarmUtils.getTargetTimeInMillisFrom(alarm.time)
+                                AlarmUtils.scheduleAlarm(this@AlarmActivity, targetTimeInMillis, updatedAlarm)
                             } else {
                                 // OFF の場合：PendingIntent をキャンセルしてアラーム停止
                                 val intent = Intent(this@AlarmActivity, AlarmReceiver::class.java).apply {

@@ -28,22 +28,23 @@ class AlarmScreenActivity : AppCompatActivity() {
         )
         setContentView(R.layout.activity_alarm_screen)
 
-        // 背景画像の設定
-        // TimesetActivity から "backgroundUri" が Intent に渡されている前提です
-        val backgroundUri = intent.getStringExtra("backgroundUri")
-        Log.d("AlarmScreenActivity", "Received backgroundUri: $backgroundUri")
+        // 背景画像の設定（TimesetActivity から "backgroundUri" が Intent に渡されている前提）
+        val backgroundUriString = intent.getStringExtra("backgroundUri")
+        Log.d("AlarmScreenActivity", "Received backgroundUri: $backgroundUriString")
         val ivAlarmBackground = findViewById<ImageView>(R.id.ivAlarmBackground)
-        if (!backgroundUri.isNullOrEmpty() && backgroundUri.startsWith("content://")) {
+        if (!backgroundUriString.isNullOrEmpty() && backgroundUriString.startsWith("content://")) {
             try {
-                val inputStream = contentResolver.openInputStream(Uri.parse(backgroundUri))
+                val backgroundUri = Uri.parse(backgroundUriString)
+                val inputStream = contentResolver.openInputStream(backgroundUri)
                 val drawable: Drawable? = Drawable.createFromStream(inputStream, null)
                 ivAlarmBackground.setImageDrawable(drawable)
                 Log.d("AlarmScreenActivity", "背景画像を設定しました")
             } catch (e: Exception) {
                 Log.e("AlarmScreenActivity", "背景画像の設定に失敗", e)
             }
+        } else {
+            Log.d("AlarmScreenActivity", "背景画像のURIが空か、content:// で始まっていません")
         }
-        // ※背景が未設定の場合は、activity_alarm_screen.xml の android:src で既定の背景が指定されている前提
 
         // アラーム音の再生処理
         val alarmMusicUriString = intent.getStringExtra("alarmMusic")
@@ -63,7 +64,7 @@ class AlarmScreenActivity : AppCompatActivity() {
             start()
         }
 
-        // 振動開始（振動処理は別途実装済みの startPersistentVibration() を呼び出す）
+        // 振動開始（振動機能は既に実装済みの startPersistentVibration() を呼び出す）
         startPersistentVibration(this)
 
         // 停止ボタンの処理
@@ -79,10 +80,10 @@ class AlarmScreenActivity : AppCompatActivity() {
         }
         mediaPlayer = null
 
-        // 振動停止（振動停止処理は別途実装済みの stopVibration() を呼び出す）
+        // 振動停止（既に実装済みの stopVibration() を呼び出す）
         stopVibration(this)
 
-        // afterMusic の再生や次画面への遷移（例：CalendarActivity へ遷移）
+        // afterMusic の再生や次画面への遷移（例として CalendarActivity へ遷移）
         val afterMusicUriString = intent.getStringExtra("afterMusic")
         val calendarIntent = Intent(this, CalendarActivity::class.java)
         if (!afterMusicUriString.isNullOrEmpty()) {

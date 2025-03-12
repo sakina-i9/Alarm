@@ -15,6 +15,7 @@ class AlarmReceiver : BroadcastReceiver() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             putExtra("alarmMusic", intent.getStringExtra("alarmMusic"))
             putExtra("afterMusic", intent.getStringExtra("afterMusic"))
+            putExtra("backgroundUri", intent.getStringExtra("backgroundUri"))
         }
         context.startActivity(alarmIntent)
     }
