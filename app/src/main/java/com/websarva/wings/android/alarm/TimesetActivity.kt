@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -24,9 +25,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.room.Room
 import com.google.android.material.chip.Chip
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -35,7 +38,7 @@ class TimesetActivity : AppCompatActivity() {
     private lateinit var tvTime: TextView
     private lateinit var btnSelectTime: Button
     private lateinit var switchEnabled: Switch
-    private lateinit var btnSelectBackground: Button  // 追加：背景画像選択ボタン
+    private lateinit var btnSelectBackground: Button
 
     // Room データベースのインスタンス（lazy 初期化）
     private val db by lazy {
@@ -91,7 +94,26 @@ class TimesetActivity : AppCompatActivity() {
         }
     }
 
-    // 背景画像選択用
+    // uCrop の結果を受け取るための launcher
+    private val cropImageLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val resultUri = UCrop.getOutput(result.data!!)
+            resultUri?.let {
+                val tvBackground = findViewById<TextView>(R.id.Set_Background)
+                // 必要に応じてファイル名も取得
+                tvBackground.text = getFileName(it) ?: "画像が選択されました"
+                tvBackground.tag = it.toString()
+                Log.d("TimesetActivity", "トリミングされた背景画像URI: ${tvBackground.tag}")
+            }
+        } else if (result.resultCode == UCrop.RESULT_ERROR) {
+            val cropError = UCrop.getError(result.data!!)
+            Log.e("TimesetActivity", "Crop エラー", cropError)
+        }
+    }
+
+    // 背景画像選択用 launcher：画像選択後、uCrop を起動
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -102,11 +124,18 @@ class TimesetActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(this, "背景画像の権限取得に失敗しました: ${e.message}", Toast.LENGTH_SHORT).show()
             }
-            val fileName = getFileName(it)
-            val tvBackground = findViewById<TextView>(R.id.Set_Background)
-            tvBackground.text = fileName ?: "不明なファイル名"
-            tvBackground.tag = it.toString()
-            Log.d("TimesetActivity", "選択された背景画像URI: ${tvBackground.tag}")
+            // uCrop を起動するための出力先 URI
+            val destinationUri = Uri.fromFile(File(cacheDir, "croppedImage.jpg"))
+            // 画面サイズの取得
+            val metrics = Resources.getSystem().displayMetrics
+            val screenWidth = metrics.widthPixels
+            val screenHeight = metrics.heightPixels
+
+            // UCrop を画面サイズに合わせたアスペクト比と最大サイズで設定
+            val uCrop = UCrop.of(it, destinationUri)
+            uCrop.withAspectRatio(screenWidth.toFloat(), screenHeight.toFloat())
+            uCrop.withMaxResultSize(screenWidth, screenHeight)
+            cropImageLauncher.launch(uCrop.getIntent(this))
         }
     }
 
@@ -161,10 +190,10 @@ class TimesetActivity : AppCompatActivity() {
         val editAlarmName = findViewById<EditText>(R.id.Alarm_Name)
         val tvAlarmMusic = findViewById<TextView>(R.id.Set_Alarm_Music)
         val tvAfterMusic = findViewById<TextView>(R.id.SetAfterMusic)
-        // 背景画像プレビュー TextView と背景画像選択ボタン
         val tvBackground = findViewById<TextView>(R.id.Set_Background)
         btnSelectBackground = findViewById(R.id.btnSelectBackground)
 
+        // 背景画像選択ボタン（uCrop を利用してトリミング）
         btnSelectBackground.setOnClickListener {
             imagePickerLauncher.launch(arrayOf("image/*"))
         }
@@ -172,7 +201,6 @@ class TimesetActivity : AppCompatActivity() {
         btnSelectTime.setOnClickListener { showTimePickerDialog() }
         findViewById<Button>(R.id.Alarm_Music_Button).setOnClickListener { audioPickerLauncher.launch(arrayOf("audio/*")) }
         findViewById<Button>(R.id.After_Music).setOnClickListener { audioPickerLauncher2.launch(arrayOf("audio/*")) }
-        btnSelectBackground.setOnClickListener { imagePickerLauncher.launch(arrayOf("image/*")) }
 
         // 編集モードの場合の初期化
         val mode = intent.getStringExtra("mode")
@@ -224,7 +252,6 @@ class TimesetActivity : AppCompatActivity() {
         }
 
         btnSaveAlarm.setOnClickListener {
-            // 時刻が未設定の場合は処理中断
             if (tvTime.text.isNullOrBlank() || tvTime.text.toString() == "00:00") {
                 Toast.makeText(this, "有効な時刻を選択してください", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener

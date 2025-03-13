@@ -21,6 +21,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Alarm">
 
+        <!-- FileProvider の追加 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.yalantis.ucrop.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"
@@ -58,6 +69,11 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true"
             android:launchMode="singleTask"/>
+        <!-- UCrop のアクティビティ宣言 -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <!-- Foreground Service の宣言 -->
         <service
