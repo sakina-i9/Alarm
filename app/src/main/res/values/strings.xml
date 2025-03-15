@@ -28,4 +28,9 @@
     <string name="stopBtn">Stop Alarm</string>
     <string name="setBackgroundName">アラーム起動時の背景画面</string>
     <string name="chooseBackground">背景</string>
+    <string name="stop_music">再生終了</string>
+    <string name="Not_set">背景未設定</string>
+    <string name="Image_Name">背景画像選択</string>
+    <string name="Schedule_input">ここに予定を入力してください</string>
+    <string name="Note">※使用方法について\n・Alarmの音量はスマホの音量が反映されます。\n・目覚ましとして使用する際は就寝前にスマホの音量をある程度上げておくことを推奨します。\n・スリープ状態で使用する場合(例:目覚ましを設定して使う場合)システム権限を得ることができないためこのアプリの画面を開いたままスリープ状態にしてください。\n</string>
 </resources>

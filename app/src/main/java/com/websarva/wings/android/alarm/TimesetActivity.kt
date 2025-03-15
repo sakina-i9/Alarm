@@ -306,6 +306,10 @@ class TimesetActivity : AppCompatActivity() {
                     Toast.makeText(this@TimesetActivity, "保存完了", Toast.LENGTH_SHORT).show()
                     val targetTimeInMillis = getTargetTimeInMillisFrom(timeText)
                     scheduleAlarm(targetTimeInMillis, alarm)
+                    // バックスタックをクリアして AlarmActivity を起動
+                    val intent = Intent(this@TimesetActivity, AlarmActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
                     startActivity(Intent(this@TimesetActivity, AlarmActivity::class.java))
                     finish()
                 }

@@ -152,7 +152,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="背景未設定"
+            android:text="@string/Not_set"
             android:textSize="20sp" />
 
         <!-- 背景画像選択ボタン -->
@@ -160,7 +160,7 @@
             android:id="@+id/btnSelectBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="背景画像選択" />
+            android:text="@string/Image_Name" />
 
         <!-- 保存ボタン -->
         <Button

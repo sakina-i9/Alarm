@@ -50,13 +50,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="8dp">
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="日" />
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="月" />
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="火" />
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="水" />
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="木" />
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="金" />
-        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="土" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="@string/niti" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="@string/getu" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="@string/ka" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="@string/sui" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="@string/moku" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="@string/kin" />
+        <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="center" android:text="@string/dou" />
     </LinearLayout>
 
     <!-- GridView：カレンダーの日付を表示 -->
@@ -75,7 +75,7 @@
         android:id="@+id/btnStopAfterMusic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="再生終了"
+        android:text="@string/stop_music"
         android:visibility="gone"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"/>

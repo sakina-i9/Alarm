@@ -63,6 +63,10 @@ class AlarmActivity : AppCompatActivity() {
         // 戻るボタンの設定
         val btnBack = findViewById<Button>(R.id.btnBack)
         btnBack.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
             finish()
         }
 

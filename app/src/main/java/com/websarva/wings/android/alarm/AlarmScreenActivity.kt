@@ -20,6 +20,10 @@ class AlarmScreenActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 起動時に WakeLock を解放（もし保持されていたら）
+        AlarmReceiver.releaseWakeLock()
+
         // ロック状態でも画面を表示する設定
         setShowWhenLocked(true)
         setTurnScreenOn(true)
