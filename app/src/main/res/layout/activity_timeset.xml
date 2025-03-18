@@ -114,7 +114,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:background="@android:drawable/edit_text"
-            android:hint="@string/TimeName" />
+            android:hint="@string/TimeName"
+            android:textColor="@color/black"/>
 
         <!-- アラーム音設定 -->
         <TextView

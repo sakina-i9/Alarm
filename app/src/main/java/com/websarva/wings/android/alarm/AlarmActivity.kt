@@ -72,12 +72,14 @@ class AlarmActivity : AppCompatActivity() {
 
         // RecyclerView の設定
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewAlarms)
+        //LinearLayoutManager を使うことで、縦方向にアイテムを並べて表示
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         // 削除ボタンや削除確認・キャンセルボタンの取得
         val deleteButton = findViewById<ImageButton>(R.id.alarm_delete)
         val confirmDeleteButton = findViewById<Button>(R.id.btnConfirmDelete)
         val cancelDeleteButton = findViewById<Button>(R.id.btnCancelDelete)
+        //visibilityは表示状態を管理
         confirmDeleteButton.visibility = Button.GONE
         cancelDeleteButton.visibility = Button.GONE
 
